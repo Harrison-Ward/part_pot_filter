@@ -4,6 +4,7 @@ from filterpy.monte_carlo import systematic_resample
 import matplotlib.pyplot as plt
 import matplotlib.ticker as ticker
 import seaborn as sns
+import os
 
 # set prior distribution parameters for particles
 num_particles = 1_000
@@ -64,10 +65,13 @@ for observed_bid in observed_bids:
     resample(particles, weights)
     pot_estimate = estimate(particles, weights)
     estimates.append(pot_estimate)
-    # print(f"Estimated Pot Size: ${pot_estimate:.2f}")
 
 
 # visualize results
+graphs_dir = 'outputs'
+if not os.path.exists(graphs_dir):
+    os.makedirs(graphs_dir)
+
 plt.style.use('fivethirtyeight')
 plt.title('Estimation of pot size as a function of bids observed')
 plt.ylabel('Pot Size')
@@ -77,6 +81,7 @@ plt.hlines(y=true_pot_value, xmin=0, xmax=n_bids, colors='gray', label=f'True po
 plt.hlines(y=initial_pot_guess, xmin=0, xmax=n_bids, colors='gray', linestyles='--', label=f'Intial estimate: ${initial_pot_guess:,.0f}')
 plt.legend()
 plt.show()
+plt.savefig(f'{graphs_dir}/estimate_time_series.png')
 
 sns.set_style("whitegrid")  # Setting the seaborn style to whitegrid for a cleaner background
 # Create the KDE plot
@@ -97,4 +102,5 @@ ax.xaxis.set_major_formatter(ticker.FuncFormatter(lambda x, pos: f'${int(x):,}')
 
 # Show the plot
 plt.show()
+plt.savefig(f'{graphs_dir}/particle_kde.png')
 
