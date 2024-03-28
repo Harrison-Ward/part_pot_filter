@@ -22,7 +22,7 @@ Here, `N(observed_bid; mean, sigma_measurement)` represents the probability dens
 
 ### Resampling Strategy
 
-Systematic resampling is employed to address the degeneracy problem, ensuring that particles with higher weights are more likely to be selected for the next generation. This method contributes to focusing computational resources on the most probable states.
+Systematic resampling is used to address degeneracy, ensuring that particles with higher weights are more likely to be selected for the next generation. This method contributes to focusing computational resources on the most probable states.
 
 ## Simulation Strategy
 
