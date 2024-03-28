@@ -80,7 +80,6 @@ plt.plot(np.arange(n_bids), estimates, label='Pot size estimate')
 plt.hlines(y=true_pot_value, xmin=0, xmax=n_bids, colors='gray', label=f'True pot size: ${true_pot_value:,.0f}')
 plt.hlines(y=initial_pot_guess, xmin=0, xmax=n_bids, colors='gray', linestyles='--', label=f'Intial estimate: ${initial_pot_guess:,.0f}')
 plt.legend()
-plt.show()
 plt.savefig(f'{graphs_dir}/estimate_time_series.png')
 
 sns.set_style("whitegrid")  # Setting the seaborn style to whitegrid for a cleaner background
@@ -101,6 +100,5 @@ ax = plt.gca()  # Get the current Axes instance
 ax.xaxis.set_major_formatter(ticker.FuncFormatter(lambda x, pos: f'${int(x):,}'))
 
 # Show the plot
-plt.show()
 plt.savefig(f'{graphs_dir}/particle_kde.png')
 

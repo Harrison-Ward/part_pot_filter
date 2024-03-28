@@ -8,13 +8,17 @@ This repository contains a Python implementation of a particle filter designed t
 
 ### Latent Transition and Update Mechanism
 
-The latent transition of the particles is modeled using a Gaussian distribution to simulate the evolution of each particle's state. For each iteration, we predict the next state based on a normal distribution centered around the current state with a standard deviation reflecting the process noise:
+The latent transition of the particles is modeled using a Gaussian distribution to simulate the evolution of each particle's state. For each iteration, we predict the next state based on:
 
-\[ particles_{t+1} = particles_t + \mathcal{N}(0, \sigma_{process}) \]
+- **Prediction:** `particles[t+1] = particles[t] + N(0, sigma_process)`
 
-The update step incorporates observed bids to adjust the weights of the particles. The likelihood of observing a bid given a particle's state is modeled with a normal distribution centered around the predicted bid (\(particle * win\_probability\)) with a standard deviation representing the measurement noise:
+Where `N(0, sigma_process)` represents Gaussian noise with mean 0 and standard deviation `sigma_process`, indicating process noise.
 
-\[ \text{likelihood} = \mathcal{N}(observed\_bid; particle * win\_probability, \sigma_{measurement}) \]
+The update step incorporates observed bids to adjust the weights of the particles. The likelihood of observing a bid given a particle's state is modeled as:
+
+- **Update:** `likelihood = N(observed_bid; particle * win_probability, sigma_measurement)`
+
+Here, `N(observed_bid; mean, sigma_measurement)` represents the probability density of the observed bid given a normal distribution with mean `particle * win_probability` and standard deviation `sigma_measurement`, indicating measurement noise.
 
 ### Resampling Strategy
 
@@ -22,7 +26,11 @@ Systematic resampling is employed to address the degeneracy problem, ensuring th
 
 ## Simulation Strategy
 
-The model is tested through a simulation that generates observed bids based on a true pot value and a defined win probability. Observed bids are simulated using a normal distribution centered around the true bid value (\(true\_pot\_value * win\_probability\)) with variability introduced by a specified standard deviation. The particle filter processes each bid sequentially, updating estimates of the pot size and refining the particles' distribution to converge towards the true pot value.
+The model is tested through a simulation that generates observed bids based on a true pot value and a defined win probability. Observed bids are simulated using:
+
+- **Simulation of Observed Bids:** `observed_bids = N(true_bid_value, bid_std)`
+
+Where `N(true_bid_value, bid_std)` generates bids centered around the `true_bid_value` with standard deviation `bid_std`. The particle filter processes each bid sequentially, updating estimates of the pot size and refining the particles' distribution to converge towards the true pot value.
 
 ## Visualizations
 
