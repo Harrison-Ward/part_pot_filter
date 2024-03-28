@@ -81,6 +81,7 @@ plt.hlines(y=true_pot_value, xmin=0, xmax=n_bids, colors='gray', label=f'True po
 plt.hlines(y=initial_pot_guess, xmin=0, xmax=n_bids, colors='gray', linestyles='--', label=f'Intial estimate: ${initial_pot_guess:,.0f}')
 plt.legend()
 plt.savefig(f'{graphs_dir}/estimate_time_series.png')
+plt.clf()
 
 sns.set_style("whitegrid")  # Setting the seaborn style to whitegrid for a cleaner background
 # Create the KDE plot
