@@ -42,6 +42,6 @@ To illustrate the performance and results of the particle filter, two key visual
 
 2. **Posterior Distribution**: A KDE plot visualizes the final distribution of particle states, which we can interpret as the posterior distribution of the model, with a vertical line marking the true pot size, showcasing the model's accuracy and uncertainty. 
 
-   ![Kernel Density Estimate of Final Particle States](./outputs/particle_kde.png)
+   ![Kernel Density Estimate of Final Particle States](./outputs/posterior_distribution.png)
 
 These visualizations provide insight into the model's dynamics, demonstrating its ability to adapt and refine the pot size estimate with each new bid observed.
