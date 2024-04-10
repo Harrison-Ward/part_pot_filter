@@ -16,15 +16,15 @@ That said, the model will still be sensitive to its pre-set parameters, like the
 
 The latent transition of the particles is modeled using a Gaussian distribution to simulate the evolution of each particle's state. For each iteration, we predict the next state based on:
 
-- **Prediction:** $particles[t+1] = particles[t] + N(0, \sigma_[process])$
+- **Prediction:** $particles[t+1] = particles[t] + N(0, \sigma_{process})$
 
-Where $N(0, \sigma_[process])$ represents Gaussian noise with mean 0 and standard deviation $\sigma_[process]$, indicating process noise.
+Where $N(0, \sigma_{process})$ represents Gaussian noise with mean 0 and standard deviation $\sigma_{process}$, indicating process noise.
 
 The update step incorporates observed bids to adjust the weights of the particles. The likelihood of observing a bid given a particle's state is modeled as:
 
-- **Update:** $likelihood = N(\text{observed bid} | particle_i \cdot \theta_[\text{pot share}], \sigma_[measurement])$
+- **Update:** $likelihood = N(\text{observed bid} | particle_i \cdot \theta_{\text{pot share}}, \sigma_{measurement})$
 
-Here, $N(\text{observed bid} | \bar{pot}, sigma_measurement)$ is the probability density of the observed bid given a normal distribution with mean $\cdot \theta_[\text{pot share}]$ and standard deviation $\sigma_[measurement]$, indicating measurement noise.
+Here, $N(\text{observed bid} | \bar{pot}, \sigma_{measurement})$ is the probability density of the observed bid given a normal distribution with mean $\cdot \theta_[\text{pot share}]$ and standard deviation $\sigma_{measurement}$, indicating measurement noise.
 
 ### Resampling Strategy
 
@@ -50,9 +50,9 @@ Bids are simulated in the following way:
     **The Scaled Shares are calculated as**: $\text{Scaled Shares} = \frac{\text{Win Counts}}{\sum \text{Win Counts}} \times \alpha$, normalized to ensure $\sum \text{Scaled Shares} = 1$.
     Observed Bids with noise: $\text{Observed Bids} = \text{Scaled Shares} \times \text{True Pot Value} + \text{Noise}$, where Noise $\sim N(0, \text{Bid Noise Percentage} \times \text{Observed Bid})$.
 
-- **Simulation of Observed Bids:** $observed_bids = $N(\text{true bid value}, \sigma_[bid])$
+- **Simulation of Observed Bids:** $observed_bids = $N(\text{true bid value}, \sigma_{bid})$
 
-Where $N(\text{true bid value}, \sigma_[bid])$ generates bids centered around the $\text{true bid value}$ with standard deviation $\sigma_[bid]$. The particle filter processes each bid sequentially, updating estimates of the pot size and refining the particles' distribution to converge towards the true pot value.
+Where $N(\text{true bid value}, \sigma_{bid})$ generates bids centered around the $\text{true bid value}$ with standard deviation $\sigma_{bid}$. The particle filter processes each bid sequentially, updating estimates of the pot size and refining the particles' distribution to converge towards the true pot value.
 
 ## Visualizations
 
@@ -68,7 +68,7 @@ To illustrate the performance and results of the particle filter, two key visual
 
    ![Kernel Density Estimate of Final Particle States](./outputs/posterior_distribution.png)
 
-3. **Model Weighting**: The particle filter and the cumulative model's respective estimates are turned into a weighted average where the weight given to each estimate in any given roudn is $\beta_[\text{particle filter}] = 1 - \frac{\text{RMSE}_[\text{particle filter}]}{\text{Total RMSE in Round i}}$ and $\beta_[\text{cumulative model}] = 1 - \beta_[\text{particle filter}]$.
+3. **Model Weighting**: The particle filter and the cumulative model's respective estimates are turned into a weighted average where the weight given to each estimate in any given roudn is $\beta_{\text{particle filter}} = 1 - \frac{\text{RMSE}_{\text{particle filter}}}{\text{Total RMSE in Round i}}$ and $\beta_{\text{cumulative model}} = 1 - \beta_{\text{particle filter}}$.
 
    ![Ensemble model weights by round](./outputs/model_weights.png)
 
