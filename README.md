@@ -24,7 +24,7 @@ The update step incorporates observed bids to adjust the weights of the particle
 
 - **Update:** $likelihood = N(\text{observed bid} | particle_i \cdot \theta_{\text{pot share}}, \sigma_{measurement})$
 
-Here, $N(\text{observed bid} | \bar{pot}, \sigma_{measurement})$ is the probability density of the observed bid given a normal distribution with mean $\cdot \theta_[\text{pot share}]$ and standard deviation $\sigma_{measurement}$, indicating measurement noise.
+Here, $N(\text{observed bid} | \bar{pot}, \sigma_{measurement})$ is the probability density of the observed bid given a normal distribution with mean $\cdot \theta_{\text{pot share}}$ and standard deviation $\sigma_{measurement}$, indicating measurement noise.
 
 ### Resampling Strategy
 
@@ -40,7 +40,7 @@ Bids are simulated in the following way:
 
 **Share Calculation**: Converts win counts into shares of the total pot, ensuring that each team's share reflects its performance. The shares are initially scaled by a factor $\alpha$ and normalized to sum to one.
 
-**Minimum Threshold Adjustment**: Guarantees that each bid meets or exceeds a minimum bid value by adjusting shares to respect a minimum share threshold, calculated as $\frac{\text{min_bid_value}}{\text{true pot value}}$.
+**Minimum Threshold Adjustment**: Guarantees that each bid meets or exceeds a minimum bid value by adjusting shares to respect a minimum share threshold, calculated as $\frac{\text{min bid value}}{\text{true pot value}}$.
 
 **Noise Addition**: Introduces variability into the bid values through normally distributed noise, proportional to each bid's size, governed by bid_noise_percentage. Additional variance is introduced to bids at the minimum threshold, controlled by min_bid_noise_percentage.
 
