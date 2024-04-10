@@ -40,7 +40,7 @@ Bids are simulated in the following way:
 
 **Share Calculation**: Converts win counts into shares of the total pot, ensuring that each team's share reflects its performance. The shares are initially scaled by a factor $\alpha$ and normalized to sum to one.
 
-**Minimum Threshold Adjustment**: Guarantees that each bid meets or exceeds a minimum bid value by adjusting shares to respect a minimum share threshold, calculated as $\frac{\text{min_bid_value}}{\text{true_pot_value}}$.
+**Minimum Threshold Adjustment**: Guarantees that each bid meets or exceeds a minimum bid value by adjusting shares to respect a minimum share threshold, calculated as $\frac{\text{min_bid_value}}{\text{true pot value}}$.
 
 **Noise Addition**: Introduces variability into the bid values through normally distributed noise, proportional to each bid's size, governed by bid_noise_percentage. Additional variance is introduced to bids at the minimum threshold, controlled by min_bid_noise_percentage.
 
@@ -70,7 +70,11 @@ To illustrate the performance and results of the particle filter, two key visual
 
 ![Kernel Density Estimate of Final Particle States](./outputs/posterior_distribution.png)
 
-3. **Model Weighting**: The particle filter and the cumulative model's respective estimates are turned into a weighted average where the weight given to each estimate in any given roudn is $\beta_{\text{particle filter}} = 1 - \frac{\text{RMSE}_{\text{particle filter}}}{\text{Total RMSE in Round i}}$ and $\beta_{\text{cumulative model}} = 1 - \beta_{\text{particle filter}}$.
+3. **Model Weighting**: The particle filter and the cumulative model's respective estimates are turned into a weighted average where the weight given to each estimate in any given round is:
+
+$$\beta_{\text{particle filter}} = 1 - \frac{\text{RMSE}_{\text{particle filter}}}{\text{Total RMSE in Round i}}$$
+
+$$\beta_{\text{cumulative model}} = 1 - \beta_{\text{particle filter}}$$
 
 ![Ensemble model weights by round](./outputs/model_weights.png)
 
