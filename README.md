@@ -35,20 +35,22 @@ Systematic resampling is used to address degeneracy, ensuring that particles wit
 The model is tested through a simulation that generates observed bids based on a true pot value and a defined win probability. Given the wide spread of bid values, generating realistic bids and predicted pot share values is non-trivial.
 
 Bids are simulated in the following way:
-    **Win Counts Generation**: Utilizes the Negative Binomial distribution, parameterized by $r$ (the number of failures until the experiment is stopped) and $p$ (the probability of success in each experiment), to simulate the number of wins for each team.
 
-    **Share Calculation**: Converts win counts into shares of the total pot, ensuring that each team's share reflects its performance. The shares are initially scaled by a factor $\alpha$ and normalized to sum to one.
+**Win Counts Generation**: Utilizes the Negative Binomial distribution, parameterized by $r$ (the number of failures until the experiment is stopped) and $p$ (the probability of success in each experiment), to simulate the number of wins for each team.
 
-    **Minimum Threshold Adjustment**: Guarantees that each bid meets or exceeds a minimum bid value by adjusting shares to respect a minimum share threshold, calculated as $\frac{\text{min_bid_value}}{\text{true_pot_value}}$.
+**Share Calculation**: Converts win counts into shares of the total pot, ensuring that each team's share reflects its performance. The shares are initially scaled by a factor $\alpha$ and normalized to sum to one.
 
-    **Noise Addition**: Introduces variability into the bid values through normally distributed noise, proportional to each bid's size, governed by bid_noise_percentage. Additional variance is introduced to bids at the minimum threshold, controlled by min_bid_noise_percentage.
+**Minimum Threshold Adjustment**: Guarantees that each bid meets or exceeds a minimum bid value by adjusting shares to respect a minimum share threshold, calculated as $\frac{\text{min_bid_value}}{\text{true_pot_value}}$.
 
-    **Bids Calculation**: Transforms shares into bid values relative to the true_pot_value, applying the noise adjustments to ensure realism and adherence to the minimum bid requirement.
+**Noise Addition**: Introduces variability into the bid values through normally distributed noise, proportional to each bid's size, governed by bid_noise_percentage. Additional variance is introduced to bids at the minimum threshold, controlled by min_bid_noise_percentage.
+
+**Bids Calculation**: Transforms shares into bid values relative to the true_pot_value, applying the noise adjustments to ensure realism and adherence to the minimum bid requirement.
 
 
-    The Negative Binomial distribution for win counts: $NB(r, p)$.
-    **The Scaled Shares are calculated as**: $\text{Scaled Shares} = \frac{\text{Win Counts}}{\sum \text{Win Counts}} \times \alpha$, normalized to ensure $\sum \text{Scaled Shares} = 1$.
-    Observed Bids with noise: $\text{Observed Bids} = \text{Scaled Shares} \times \text{True Pot Value} + \text{Noise}$, where Noise $\sim N(0, \text{Bid Noise Percentage} \times \text{Observed Bid})$.
+The Negative Binomial distribution for win counts: $NB(r, p)$.
+
+**The Scaled Shares are calculated as**: $\text{Scaled Shares} = \frac{\text{Win Counts}}{\sum \text{Win Counts}} \times \alpha$, normalized to ensure $\sum \text{Scaled Shares} = 1$.
+Observed Bids with noise: $\text{Observed Bids} = \text{Scaled Shares} \times \text{True Pot Value} + \text{Noise}$, where Noise $\sim N(0, \text{Bid Noise Percentage} \times \text{Observed Bid})$.
 
 - **Simulation of Observed Bids:** $observed_bids = $N(\text{true bid value}, \sigma_{bid})$
 
@@ -60,20 +62,20 @@ To illustrate the performance and results of the particle filter, two key visual
 
 1. **Time Series Estimation**: These graph shows the estimated pot size as a function of observed bids over time, comparing it to the true pot value.
 
-   ![Estimation of Pot Size as a Function of Bids Observed](./outputs/cumulative_model_time_series.png)
-   ![Estimation of Pot Size as a Function of Bids Observed](./outputs/particle_filter_model_time_series.png)
-   ![Estimation of Pot Size as a Function of Bids Observed](./outputs/ensemble_model_time_series.png)
+![Estimation of Pot Size as a Function of Bids Observed](./outputs/cumulative_model_time_series.png)
+![Estimation of Pot Size as a Function of Bids Observed](./outputs/particle_filter_model_time_series.png)
+![Estimation of Pot Size as a Function of Bids Observed](./outputs/ensemble_model_time_series.png)
 
 2. **Posterior Distribution**: A KDE plot visualizes the final distribution of particle states, which we can interpret as the posterior distribution of the model, with a vertical line marking the true pot size, showcasing the model's accuracy and uncertainty. 
 
-   ![Kernel Density Estimate of Final Particle States](./outputs/posterior_distribution.png)
+![Kernel Density Estimate of Final Particle States](./outputs/posterior_distribution.png)
 
 3. **Model Weighting**: The particle filter and the cumulative model's respective estimates are turned into a weighted average where the weight given to each estimate in any given roudn is $\beta_{\text{particle filter}} = 1 - \frac{\text{RMSE}_{\text{particle filter}}}{\text{Total RMSE in Round i}}$ and $\beta_{\text{cumulative model}} = 1 - \beta_{\text{particle filter}}$.
 
-   ![Ensemble model weights by round](./outputs/model_weights.png)
+![Ensemble model weights by round](./outputs/model_weights.png)
 
 4. **Model Error**: Leveraging an ensemble model: which simply takes a weighted average between the particle filter, much more accurate in early rounds, and the cumulative model, which is less suceptible to error as a result of highly variable bids, creates a fairly accurate estimate of the pot size in each round. In simulations the ensemble model can guess the pot size within +/- 5% after the first bid and then within +/- 2% after the first 5-10 bids.
 
-   ![Model RMSE](./outputs/model_rmses.png)
+![Model RMSE](./outputs/model_rmses.png)
 
 
