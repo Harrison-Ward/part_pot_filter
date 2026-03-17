@@ -1,0 +1,912 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Calcutta Pot Estimator</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=DM+Sans:wght@400;500;600;700&display=swap');
+
+  :root {
+    --bg: #0d1117;
+    --surface: #161b22;
+    --surface-hover: #1c2129;
+    --border: #30363d;
+    --text: #e6edf3;
+    --text-dim: #8b949e;
+    --accent: #58a6ff;
+    --accent-glow: rgba(88, 166, 255, 0.15);
+    --green: #3fb950;
+    --green-dim: rgba(63, 185, 80, 0.15);
+    --orange: #d29922;
+    --red: #f85149;
+    --mono: 'DM Mono', monospace;
+    --sans: 'DM Sans', -apple-system, sans-serif;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: var(--sans);
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    padding: 24px;
+  }
+
+  .container {
+    max-width: 960px;
+    margin: 0 auto;
+  }
+
+  header {
+    margin-bottom: 32px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  header h1 {
+    font-size: 22px;
+    font-weight: 600;
+    letter-spacing: -0.3px;
+    margin-bottom: 4px;
+  }
+
+  header p {
+    color: var(--text-dim);
+    font-size: 13px;
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: 340px 1fr;
+    gap: 24px;
+    align-items: start;
+  }
+
+  @media (max-width: 780px) {
+    .grid { grid-template-columns: 1fr; }
+  }
+
+  /* ---- LEFT PANEL: CONFIG ---- */
+  .panel {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 20px;
+    overflow: hidden;
+  }
+
+  .panel h2 {
+    font-size: 13px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    color: var(--text-dim);
+    margin-bottom: 16px;
+  }
+
+  .field { margin-bottom: 14px; }
+
+  .field label {
+    display: block;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text-dim);
+    margin-bottom: 4px;
+  }
+
+  .field input {
+    width: 100%;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 5px;
+    color: var(--text);
+    font-family: var(--mono);
+    font-size: 14px;
+    padding: 8px 10px;
+    outline: none;
+    transition: border-color 0.15s;
+  }
+
+  .field input:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--accent-glow);
+  }
+
+  .field-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+
+  .divider {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 18px 0;
+  }
+
+  /* bid entry section */
+  .bid-entry {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    margin-bottom: 12px;
+  }
+
+  .bid-entry .team-field {
+    grid-column: 1 / -1;
+  }
+
+  .bid-entry input {
+    width: 100%;
+    min-width: 0;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 5px;
+    color: var(--text);
+    font-family: var(--mono);
+    font-size: 13px;
+    padding: 7px 8px;
+    outline: none;
+    transition: border-color 0.15s;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .bid-entry input:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--accent-glow);
+  }
+
+  .bid-entry label {
+    font-size: 11px;
+    color: var(--text-dim);
+    margin-bottom: 3px;
+    display: block;
+  }
+
+  button {
+    cursor: pointer;
+    font-family: var(--sans);
+    font-weight: 500;
+    border: none;
+    border-radius: 5px;
+    transition: all 0.15s;
+  }
+
+  .btn-add {
+    background: var(--accent);
+    color: var(--bg);
+    font-size: 18px;
+    padding: 7px 0;
+    line-height: 1;
+  }
+
+  .btn-add:hover { opacity: 0.85; }
+
+  .btn-reset {
+    background: transparent;
+    color: var(--text-dim);
+    border: 1px solid var(--border);
+    font-size: 12px;
+    padding: 6px 14px;
+    margin-top: 8px;
+  }
+
+  .btn-reset:hover {
+    color: var(--red);
+    border-color: var(--red);
+  }
+
+  /* bid log */
+  .bid-log {
+    max-height: 220px;
+    overflow-y: auto;
+    margin-top: 10px;
+  }
+
+  .bid-log::-webkit-scrollbar { width: 5px; }
+  .bid-log::-webkit-scrollbar-track { background: transparent; }
+  .bid-log::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+  .bid-row {
+    display: grid;
+    grid-template-columns: 22px 1fr 70px 30px;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 4px;
+    font-size: 12px;
+    font-family: var(--mono);
+    border-bottom: 1px solid rgba(48,54,61,0.5);
+  }
+
+  .bid-row .idx {
+    color: var(--text-dim);
+    text-align: right;
+    font-size: 10px;
+  }
+
+  .bid-row .team-name {
+    color: var(--text);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .bid-row .bid-val {
+    color: var(--green);
+    text-align: right;
+  }
+
+  .bid-row .del-btn {
+    background: none;
+    border: none;
+    color: var(--text-dim);
+    font-size: 14px;
+    cursor: pointer;
+    padding: 0;
+    text-align: center;
+    line-height: 1;
+  }
+
+  .bid-row .del-btn:hover { color: var(--red); }
+
+  /* ---- RIGHT PANEL: OUTPUT ---- */
+  .estimate-display {
+    text-align: center;
+    padding: 28px 20px;
+    margin-bottom: 20px;
+    background: linear-gradient(135deg, var(--surface) 0%, rgba(22,27,34,0.6) 100%);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .estimate-display::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, var(--accent), var(--green));
+  }
+
+  .estimate-label {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 1.2px;
+    color: var(--text-dim);
+    margin-bottom: 6px;
+  }
+
+  .estimate-value {
+    font-family: var(--mono);
+    font-size: 42px;
+    font-weight: 500;
+    color: var(--green);
+    letter-spacing: -1px;
+  }
+
+  .estimate-sub {
+    font-size: 12px;
+    color: var(--text-dim);
+    margin-top: 6px;
+    font-family: var(--mono);
+  }
+
+  .ci-bar {
+    margin-top: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    font-size: 11px;
+    font-family: var(--mono);
+    color: var(--text-dim);
+  }
+
+  .ci-bar .bar {
+    flex: 0 0 120px;
+    height: 6px;
+    background: var(--border);
+    border-radius: 3px;
+    position: relative;
+  }
+
+  .ci-bar .bar-fill {
+    position: absolute;
+    top: 0; bottom: 0;
+    background: var(--accent);
+    border-radius: 3px;
+    opacity: 0.6;
+  }
+
+  /* chart area */
+  .chart-container {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 16px;
+  }
+
+  .chart-container h3 {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    margin-bottom: 12px;
+  }
+
+  canvas {
+    width: 100% !important;
+    height: 260px !important;
+  }
+
+  .empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 260px;
+    color: var(--text-dim);
+    font-size: 13px;
+    gap: 6px;
+  }
+
+  .empty-state span { font-size: 28px; opacity: 0.4; }
+
+  .stats-row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    margin-bottom: 16px;
+  }
+
+  .stat-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 12px;
+    text-align: center;
+  }
+
+  .stat-card .stat-label {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    color: var(--text-dim);
+    margin-bottom: 4px;
+  }
+
+  .stat-card .stat-val {
+    font-family: var(--mono);
+    font-size: 16px;
+    font-weight: 500;
+    color: var(--text);
+  }
+
+  .field-hint {
+    font-size: 11px;
+    color: var(--text-dim);
+    margin-top: 3px;
+    line-height: 1.4;
+    font-style: italic;
+  }
+
+  .field-advanced label { color: #484f58; }
+
+  .field-advanced input {
+    color: #484f58 !important;
+    background: #0d1117 !important;
+    border-color: #21262d !important;
+    cursor: not-allowed;
+  }
+
+  .field-advanced input:focus {
+    border-color: #30363d !important;
+    box-shadow: none !important;
+  }
+
+  .advanced-note {
+    font-size: 10px;
+    color: #484f58;
+    margin-top: 6px;
+    padding: 6px 8px;
+    border: 1px dashed #21262d;
+    border-radius: 4px;
+    line-height: 1.4;
+  }
+
+  .field-locked label { color: #484f58; }
+
+  .field-locked input {
+    color: #484f58 !important;
+    background: #0d1117 !important;
+    border-color: #21262d !important;
+    cursor: not-allowed;
+    opacity: 0.6;
+  }
+
+  .field-locked input:focus {
+    border-color: #21262d !important;
+    box-shadow: none !important;
+  }
+
+  .field-locked .field-hint { opacity: 0.5; }
+
+  .locked-banner {
+    font-size: 10px;
+    color: var(--orange);
+    padding: 5px 8px;
+    border: 1px solid rgba(210, 153, 34, 0.3);
+    border-radius: 4px;
+    margin-bottom: 14px;
+    line-height: 1.4;
+    display: none;
+  }
+</style>
+</head>
+<body>
+<div class="container">
+  <header>
+    <h1>Calcutta Pot Size Estimator</h1>
+    <p>Sequential Monte Carlo &middot; Enter bids as they happen to update the pot estimate in real-time</p>
+  </header>
+
+  <div class="grid">
+    <!-- LEFT: Config + Bid Entry -->
+    <div>
+      <div class="panel" style="margin-bottom:16px">
+        <h2>Model Parameters</h2>
+        <div class="locked-banner" id="lockedBanner">&#128274; Parameters locked after first bid. Reset all bids to change them.</div>
+        <div class="field" id="fieldInitPot">
+          <label>Initial Pot Estimate ($)</label>
+          <input type="text" id="initPot" value="250,000" />
+          <div class="field-hint">Your best guess at total pot size before the auction starts. Use last year's pot or consensus from your group as a baseline.</div>
+        </div>
+        <div class="field-row">
+          <div class="field" id="fieldPotStd">
+            <label>Estimate Std Dev ($)</label>
+            <input type="text" id="potStd" value="45,000" />
+            <div class="field-hint">How uncertain you are. ~15-20% of your estimate is a good default. Wider = the model adapts faster to bids.</div>
+          </div>
+          <div class="field" id="fieldMeasNoise">
+            <label>Meas. Noise Base ($)</label>
+            <input type="text" id="measNoise" value="25,000" />
+            <div class="field-hint">Noise on each bid's implied pot size (bid &divide; win%). Every team contributes equally to the estimate.</div>
+          </div>
+        </div>
+        <div class="field-row">
+          <div class="field field-advanced">
+            <label>Particles</label>
+            <input type="text" id="numParticles" value="5,000" />
+          </div>
+          <div class="field field-advanced">
+            <label>Process Noise ($)</label>
+            <input type="text" id="processNoise" value="300" />
+          </div>
+        </div>
+        <div class="advanced-note">&#9432; Particles &amp; process noise are tuned defaults &mdash; no need to change these unless you know what you're doing.</div>
+      </div>
+
+      <div class="panel">
+        <h2>Add Bid</h2>
+        <div class="bid-entry">
+          <div class="team-field">
+            <label>Team Name</label>
+            <input type="text" id="teamName" placeholder="e.g. Duke" />
+          </div>
+          <div>
+            <label>Sale Price ($)</label>
+            <input type="text" id="bidPrice" placeholder="12,000" />
+          </div>
+          <div>
+            <label>Win % <span style="color:#484f58;font-weight:400">(e.g. 20.1 not 0.201)</span></label>
+            <input type="text" id="winProb" placeholder="5.5" />
+          </div>
+        </div>
+        <div style="display:flex;gap:8px">
+          <button class="btn-add" onclick="addBid()" style="flex:1" title="Add bid">+ Add Bid</button>
+        </div>
+        <hr class="divider" />
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <h2 style="margin:0">Bid Log</h2>
+          <button class="btn-reset" onclick="resetAll()">Reset All</button>
+        </div>
+        <div class="bid-log" id="bidLog">
+          <div class="empty-state" style="height:60px"><span style="font-size:16px">No bids yet</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- RIGHT: Output -->
+    <div>
+      <div class="estimate-display" id="estimateBox">
+        <div class="estimate-label">Current Pot Estimate</div>
+        <div class="estimate-value" id="potEstimate">—</div>
+        <div class="estimate-sub" id="estSub">Add bids to begin estimation</div>
+        <div class="ci-bar" id="ciBar" style="display:none">
+          <span id="ciLow"></span>
+          <div class="bar"><div class="bar-fill" id="ciFill"></div></div>
+          <span id="ciHigh"></span>
+        </div>
+      </div>
+
+      <div class="stats-row" id="statsRow" style="display:none">
+        <div class="stat-card">
+          <div class="stat-label">Bids In</div>
+          <div class="stat-val" id="statBids">0</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Total Observed</div>
+          <div class="stat-val" id="statObserved">$0</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Prob Mass Seen</div>
+          <div class="stat-val" id="statProbMass">0%</div>
+        </div>
+      </div>
+
+      <div class="chart-container">
+        <h3>Estimate Convergence</h3>
+        <canvas id="chart"></canvas>
+        <div class="empty-state" id="chartEmpty">
+          <span>&#9679;</span>
+          Estimates will appear here as bids are added
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ==================== PARTICLE FILTER (ported from Python) ====================
+
+function parseNum(id) {
+  return parseFloat(document.getElementById(id).value.replace(/,/g, '')) || 0;
+}
+
+function fmt(n) {
+  return '$' + Math.round(n).toLocaleString();
+}
+
+// Gaussian random (Box-Muller)
+function randn() {
+  let u = 0, v = 0;
+  while (u === 0) u = Math.random();
+  while (v === 0) v = Math.random();
+  return Math.sqrt(-2.0 * Math.log(u)) * Math.cos(2.0 * Math.PI * v);
+}
+
+// Normal PDF
+function normPdf(x, mean, std) {
+  const z = (x - mean) / std;
+  return Math.exp(-0.5 * z * z) / (std * Math.sqrt(2 * Math.PI));
+}
+
+// Systematic resample (matches filterpy)
+function systematicResample(weights) {
+  const N = weights.length;
+  const positions = new Float64Array(N);
+  const cumsum = new Float64Array(N);
+  cumsum[0] = weights[0];
+  for (let i = 1; i < N; i++) cumsum[i] = cumsum[i-1] + weights[i];
+  const start = Math.random() / N;
+  const indices = new Int32Array(N);
+  let j = 0;
+  for (let i = 0; i < N; i++) {
+    const target = start + i / N;
+    while (j < N - 1 && cumsum[j] < target) j++;
+    indices[i] = j;
+  }
+  return indices;
+}
+
+// ==================== STATE ====================
+let bids = [];         // {team, price, winProb}
+let estimates = [];    // pot estimate after each bid
+let particles = null;
+let weights = null;
+
+function initParticles() {
+  const N = parseNum('numParticles');
+  const mean = parseNum('initPot');
+  const std = parseNum('potStd');
+  particles = new Float64Array(N);
+  weights = new Float64Array(N);
+  for (let i = 0; i < N; i++) {
+    particles[i] = mean + randn() * std;
+    weights[i] = 1.0 / N;
+  }
+}
+
+function runFilterFromScratch() {
+  initParticles();
+  estimates = [];
+  const N = particles.length;
+  const processNoise = parseNum('processNoise');
+  const baseMeasNoise = parseNum('measNoise');
+
+  for (const bid of bids) {
+    const wp = bid.winProb / 100;
+
+    // Convert observed bid into an implied pot size:
+    //   implied_pot = sale_price / win_probability
+    // This puts every bid into pot-size units so a 1.5% team
+    // and a 15% team contribute comparable signal magnitude.
+    const impliedPot = bid.price / Math.max(wp, 0.005);
+
+    // Measurement noise in pot-size space is constant — every team's
+    // implied pot estimate is treated as equally informative.
+    const measNoise = baseMeasNoise;
+
+    // predict
+    for (let i = 0; i < N; i++) {
+      particles[i] += randn() * processNoise;
+    }
+    // update: compare each particle (a pot-size hypothesis)
+    // directly against the implied pot from this bid
+    for (let i = 0; i < N; i++) {
+      const likelihood = normPdf(impliedPot, particles[i], measNoise);
+      weights[i] *= likelihood;
+    }
+    // normalize
+    let wSum = 0;
+    for (let i = 0; i < N; i++) wSum += weights[i];
+    if (wSum > 0) {
+      for (let i = 0; i < N; i++) weights[i] /= wSum;
+    } else {
+      for (let i = 0; i < N; i++) weights[i] = 1.0 / N;
+    }
+    // resample
+    const indices = systematicResample(weights);
+    const newP = new Float64Array(N);
+    for (let i = 0; i < N; i++) newP[i] = particles[indices[i]];
+    particles.set(newP);
+    weights.fill(1.0 / N);
+    // estimate
+    let est = 0;
+    for (let i = 0; i < N; i++) est += particles[i] * weights[i];
+    estimates.push(est);
+  }
+}
+
+// ==================== PARAM LOCKING ====================
+const lockableFields = ['fieldInitPot', 'fieldPotStd', 'fieldMeasNoise'];
+const lockableInputs = ['initPot', 'potStd', 'measNoise'];
+
+function lockParams() {
+  lockableFields.forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.classList.add('field-locked');
+  });
+  lockableInputs.forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.setAttribute('readonly', true);
+  });
+  document.getElementById('lockedBanner').style.display = 'block';
+}
+
+function unlockParams() {
+  lockableFields.forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.classList.remove('field-locked');
+  });
+  lockableInputs.forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.removeAttribute('readonly');
+  });
+  document.getElementById('lockedBanner').style.display = 'none';
+}
+
+// ==================== UI ====================
+function addBid() {
+  const team = document.getElementById('teamName').value.trim() || ('Team ' + (bids.length + 1));
+  const price = parseFloat(document.getElementById('bidPrice').value.replace(/,/g, '')) || 0;
+  const wp = parseFloat(document.getElementById('winProb').value.replace(/,/g, '')) || 0;
+  if (price <= 0 || wp <= 0) { alert('Enter a valid sale price and win %.'); return; }
+  bids.push({ team, price, winProb: wp });
+  document.getElementById('teamName').value = '';
+  document.getElementById('bidPrice').value = '';
+  document.getElementById('winProb').value = '';
+  document.getElementById('teamName').focus();
+  update();
+}
+
+function removeBid(idx) {
+  bids.splice(idx, 1);
+  update();
+}
+
+function resetAll() {
+  bids = [];
+  estimates = [];
+  particles = null;
+  weights = null;
+  update();
+}
+
+function update() {
+  // lock or unlock params
+  if (bids.length > 0) {
+    lockParams();
+  } else {
+    unlockParams();
+  }
+
+  // run filter
+  if (bids.length > 0) {
+    runFilterFromScratch();
+  } else {
+    estimates = [];
+  }
+
+  // update estimate display
+  const estEl = document.getElementById('potEstimate');
+  const subEl = document.getElementById('estSub');
+  const ciBar = document.getElementById('ciBar');
+  const statsRow = document.getElementById('statsRow');
+
+  if (estimates.length === 0) {
+    estEl.textContent = '—';
+    subEl.textContent = 'Add bids to begin estimation';
+    ciBar.style.display = 'none';
+    statsRow.style.display = 'none';
+  } else {
+    const latest = estimates[estimates.length - 1];
+    estEl.textContent = fmt(latest);
+
+    // compute 90% CI from particles
+    const sorted = Float64Array.from(particles).sort();
+    const N = sorted.length;
+    const lo = sorted[Math.floor(N * 0.05)];
+    const hi = sorted[Math.floor(N * 0.95)];
+    subEl.textContent = '90% CI: ' + fmt(lo) + ' — ' + fmt(hi);
+    ciBar.style.display = 'flex';
+    document.getElementById('ciLow').textContent = fmt(lo);
+    document.getElementById('ciHigh').textContent = fmt(hi);
+
+    // position fill bar relative to range
+    const range = hi - lo;
+    const fillLeft = 0;
+    const fillRight = 100;
+    document.getElementById('ciFill').style.left = '0%';
+    document.getElementById('ciFill').style.width = '100%';
+
+    statsRow.style.display = 'grid';
+    document.getElementById('statBids').textContent = bids.length;
+    const totalObs = bids.reduce((s, b) => s + b.price, 0);
+    document.getElementById('statObserved').textContent = fmt(totalObs);
+    const totalWinProb = bids.reduce((s, b) => s + b.winProb / 100, 0);
+    document.getElementById('statProbMass').textContent = (totalWinProb * 100).toFixed(1) + '%';
+  }
+
+  // update bid log
+  const log = document.getElementById('bidLog');
+  if (bids.length === 0) {
+    log.innerHTML = '<div class="empty-state" style="height:60px"><span style="font-size:16px">No bids yet</span></div>';
+  } else {
+    log.innerHTML = bids.map((b, i) =>
+      `<div class="bid-row">
+        <span class="idx">${i + 1}</span>
+        <span class="team-name" title="${b.team}">${b.team}</span>
+        <span class="bid-val">${fmt(b.price)}</span>
+        <button class="del-btn" onclick="removeBid(${i})" title="Remove">&times;</button>
+      </div>`
+    ).join('');
+  }
+
+  // draw chart
+  drawChart();
+}
+
+// ==================== CHART (pure canvas, no deps) ====================
+function drawChart() {
+  const canvas = document.getElementById('chart');
+  const empty = document.getElementById('chartEmpty');
+
+  if (estimates.length === 0) {
+    canvas.style.display = 'none';
+    empty.style.display = 'flex';
+    return;
+  }
+  canvas.style.display = 'block';
+  empty.style.display = 'none';
+
+  const ctx = canvas.getContext('2d');
+  const dpr = window.devicePixelRatio || 1;
+  const rect = canvas.getBoundingClientRect();
+  canvas.width = rect.width * dpr;
+  canvas.height = rect.height * dpr;
+  ctx.scale(dpr, dpr);
+  const W = rect.width;
+  const H = rect.height;
+
+  ctx.clearRect(0, 0, W, H);
+
+  const pad = { top: 20, right: 20, bottom: 32, left: 64 };
+  const pw = W - pad.left - pad.right;
+  const ph = H - pad.top - pad.bottom;
+
+  const initGuess = parseNum('initPot');
+  const allVals = [...estimates, initGuess];
+  let yMin = Math.min(...allVals) * 0.95;
+  let yMax = Math.max(...allVals) * 1.05;
+  if (yMin === yMax) { yMin -= 1000; yMax += 1000; }
+
+  const xScale = (i) => pad.left + (estimates.length === 1 ? pw / 2 : (i / (estimates.length - 1)) * pw);
+  const yScale = (v) => pad.top + ph - ((v - yMin) / (yMax - yMin)) * ph;
+
+  // grid lines
+  ctx.strokeStyle = '#21262d';
+  ctx.lineWidth = 1;
+  const nTicks = 5;
+  ctx.font = '10px "DM Mono", monospace';
+  ctx.fillStyle = '#8b949e';
+  ctx.textAlign = 'right';
+  for (let t = 0; t <= nTicks; t++) {
+    const val = yMin + (t / nTicks) * (yMax - yMin);
+    const y = yScale(val);
+    ctx.beginPath();
+    ctx.moveTo(pad.left, y);
+    ctx.lineTo(W - pad.right, y);
+    ctx.stroke();
+    ctx.fillText('$' + Math.round(val).toLocaleString(), pad.left - 6, y + 3);
+  }
+
+  // x-axis labels
+  ctx.textAlign = 'center';
+  for (let i = 0; i < estimates.length; i++) {
+    const x = xScale(i);
+    ctx.fillText(i + 1, x, H - pad.bottom + 16);
+  }
+  ctx.fillText('Bid #', pad.left + pw / 2, H - 4);
+
+  // initial guess line
+  const iy = yScale(initGuess);
+  ctx.setLineDash([6, 4]);
+  ctx.strokeStyle = '#8b949e';
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.moveTo(pad.left, iy);
+  ctx.lineTo(W - pad.right, iy);
+  ctx.stroke();
+  ctx.setLineDash([]);
+  ctx.fillStyle = '#8b949e';
+  ctx.textAlign = 'left';
+  ctx.fillText('Initial: ' + fmt(initGuess), pad.left + 4, iy - 6);
+
+  // estimate line
+  ctx.strokeStyle = '#3fb950';
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  for (let i = 0; i < estimates.length; i++) {
+    const x = xScale(i);
+    const y = yScale(estimates[i]);
+    if (i === 0) ctx.moveTo(x, y);
+    else ctx.lineTo(x, y);
+  }
+  ctx.stroke();
+
+  // dots
+  ctx.fillStyle = '#3fb950';
+  for (let i = 0; i < estimates.length; i++) {
+    ctx.beginPath();
+    ctx.arc(xScale(i), yScale(estimates[i]), 3.5, 0, Math.PI * 2);
+    ctx.fill();
+  }
+}
+
+// keyboard shortcut: Enter to add bid
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Enter' && (document.activeElement.id === 'teamName' || document.activeElement.id === 'bidPrice' || document.activeElement.id === 'winProb')) {
+    addBid();
+  }
+});
+
+window.addEventListener('resize', () => { if (estimates.length > 0) drawChart(); });
+</script>
+</body>
+</html>
