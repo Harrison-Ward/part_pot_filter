@@ -469,26 +469,28 @@
         <div class="field-row">
           <div class="field" id="fieldPotStd">
             <label>Estimate Std Dev ($)</label>
-            <input type="text" id="potStd" value="45,000" />
-            <div class="field-hint">How uncertain you are. ~15-20% of your estimate is a good default. Wider = the model adapts faster to bids.</div>
-          </div>
-          <div class="field" id="fieldMeasNoise">
-            <label>Meas. Noise Base ($)</label>
-            <input type="text" id="measNoise" value="25,000" />
-            <div class="field-hint">Noise on each bid's implied pot size (bid &divide; win%). Every team contributes equally to the estimate.</div>
+            <input type="text" id="potStd" value="35,000" />
+            <div class="field-hint">How uncertain you are. ~10-15% of your estimate is a good default. Wider = the model adapts faster to bids.</div>
           </div>
         </div>
         <div class="field-row">
           <div class="field field-advanced">
+            <label>Meas. Noise ($)</label>
+            <input type="text" id="measNoise" value="50,000" />
+          </div>
+          <div class="field field-advanced">
             <label>Particles</label>
             <input type="text" id="numParticles" value="5,000" />
           </div>
+        </div>
+        <div class="field-row">
           <div class="field field-advanced">
             <label>Process Noise ($)</label>
             <input type="text" id="processNoise" value="300" />
           </div>
+          <div class="field field-advanced"></div>
         </div>
-        <div class="advanced-note">&#9432; Particles &amp; process noise are tuned defaults &mdash; no need to change these unless you know what you're doing.</div>
+        <div class="advanced-note">&#9432; Meas. noise, particles &amp; process noise are tuned defaults &mdash; no need to change these.</div>
       </div>
 
       <div class="panel">
@@ -674,8 +676,8 @@ function runFilterFromScratch() {
 }
 
 // ==================== PARAM LOCKING ====================
-const lockableFields = ['fieldInitPot', 'fieldPotStd', 'fieldMeasNoise'];
-const lockableInputs = ['initPot', 'potStd', 'measNoise'];
+const lockableFields = ['fieldInitPot', 'fieldPotStd'];
+const lockableInputs = ['initPot', 'potStd'];
 
 function lockParams() {
   lockableFields.forEach(id => {
